@@ -1,0 +1,185 @@
+<!DOCTYPE html>
+<html lang="he">
+
+<head>
+    <meta charset="UTF-8">
+    <title>בחירת חבילה</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            direction: rtl;
+            padding: 40px;
+        }
+
+        h1 {
+            text-align: center;
+        }
+
+        .container {
+            max-width: 500px;
+            margin: auto;
+        }
+
+        .form-group {
+            margin-bottom: 20px;
+        }
+
+        .form-group label {
+            font-weight: bold;
+        }
+
+        select,
+        input[type="text"] {
+            width: 100%;
+            padding: 8px;
+            margin-top: 5px;
+            border: 1px solid #ccc;
+            border-radius: 4px;
+        }
+
+        button {
+            background-color: #4CAF50;
+            color: white;
+            padding: 10px 15px;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+            width: 100%;
+            font-size: 16px;
+        }
+
+        button:hover {
+            background-color: #45a049;
+        }
+    </style>
+</head>
+
+<body>
+    <h1>בחירת חבילה</h1>
+    <div class="container">
+        <form id="packageForm">
+            <!-- שדה מייל -->
+            <div class="form-group">
+                <label for="email">מייל:</label>
+                <input type="text" id="email" name="email" disabled />
+            </div>
+
+            <!-- שדה מיקום -->
+            <div class="form-group">
+                <label for="location">מיקום:</label>
+                <input type="text" id="location" name="location" disabled />
+            </div>
+
+            <!-- רשימת החבילות -->
+            <div class="form-group">
+                <label for="package">בחר חבילה:</label>
+                <select id="package" name="package">
+                    <!-- חבילות יועלו כאן עם JavaScript -->
+                </select>
+            </div>
+
+            <!-- שדה לתמונה -->
+            <div class="form-group">
+                <label for="imageName">שם התמונה:</label>
+                <input type="text" id="imageName" name="imageName" />
+            </div>
+
+            <button type="submit">בחר חבילה</button>
+        </form>
+    </div>
+
+    <script>
+        // קריאת פרמטרים מהמיקום ב-URL
+        const urlParams = new URLSearchParams(window.location.search);
+        const email = urlParams.get('email');
+        const userLocation = urlParams.get('location');
+        console.log("אני כאן");
+        console.log(email);
+        console.log(location);
+        // הצגת המייל והמיקום בשדות המתאימים
+        document.getElementById('email').value = email;
+        document.getElementById('location').value = userLocation;
+
+        // טעינת החבילות מהשרת
+        function loadPackages() {
+            console.log("i find sss");
+            fetch('http://localhost:8080/api/board/packeg/') 
+            // URL של ה-API שמחזיר את החבילות
+            
+                .then(res => res.json())
+                .then(data => {
+                    const packageSelect = document.getElementById('package');
+                    data.forEach(package => {
+                        console.log("i find");
+                        const option = document.createElement('option');
+                        option.value = package.id; // או כל מזהה שקשור לחבילה
+                        option.textContent = ` ${package.days} ימים, ${package.entrances} כניסות`;
+                        packageSelect.appendChild(option);
+                    });
+                })
+                .catch(err => {
+                    console.error('שגיאה בטעינת החבילות:', err);
+                });
+        }
+
+        // קריאה לפונקציה לטעינת החבילות
+        loadPackages();
+
+        // שליחת הטופס
+        document.getElementById('packageForm').addEventListener('submit', function (event) {
+            event.preventDefault();
+
+            const selectedPackage = document.getElementById('package').value;
+            const imageName = document.getElementById('imageName').value;
+
+            // פעולה לשלוח את המידע לשרת (למשל, כתובת POST לעיבוד הנתונים)
+            const formData = {
+                clientEmail: email,
+                numPlace: parseInt(userLocation),
+                packageId: parseInt(selectedPackage),
+                image: imageName
+            };
+
+            fetch('http://localhost:8080/api/board/Advertisment/', { // דוגמה לכתובת API לשליחת המידע
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify(formData)
+            })
+                .then(res => res.json())
+                .then(response => {
+                    console.log('החבילה נבחרה בהצלחה:', response);
+                    // כאן תוכל להנחות את המשתמש לעמוד הבא, או להציג הודעה
+                })
+                .catch(err => {
+                    console.error('שגיאה בשליחת המידע:', err);
+                });
+            const formDataForClientPackages = {
+                email: email,
+                packageId: parseInt(selectedPackage)
+            };
+            fetch(`http://localhost:8080/api/board/client/${email}/${selectedPackage}`, {
+                method: 'PUT',
+                headers: {
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify(formDataForClientPackages)
+            })
+                .then(res => {
+                    console.log('תגובה מהשרת:', res);
+                    return res.json();
+                })
+                .then(response => {
+                    console.log('העדכון עבר בהצלחה', response);
+                })
+                .catch(err => {
+                    console.error('שגיאה בשליחת המידע:', err);
+                });
+                const url = `board.html`; // יצירת כתובת עם פרמטר מיקום
+                window.location.href = url; 
+        });
+    </script>
+</body>
+
+</html>

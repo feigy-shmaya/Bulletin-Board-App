@@ -1,0 +1,146 @@
+<!DOCTYPE html>
+<html lang="he">
+<head>
+  <meta charset="UTF-8">
+  <title>בחר חבילת פרסום</title>
+  <style>
+    body {
+      direction: rtl;
+      font-family: Arial, sans-serif;
+      background: #f5f5f5;
+      padding: 30px;
+    }
+    h1 {
+      text-align: center;
+    }
+    .packages {
+      display: flex;
+      flex-direction: column;
+      gap: 20px;
+      max-width: 600px;
+      margin: auto;
+    }
+    .package {
+      background: white;
+      border-radius: 12px;
+      padding: 20px;
+      box-shadow: 0 2px 6px rgba(0,0,0,0.1);
+    }
+    .package h3 {
+      margin: 0;
+    }
+    .package p {
+      margin: 5px 0;
+    }
+    .package button {
+      background: #4CAF50;
+      color: white;
+      border: none;
+      padding: 10px 20px;
+      border-radius: 8px;
+      cursor: pointer;
+      font-weight: bold;
+    }
+    .package button:hover {
+      background: #388E3C;
+    }
+    .form-container {
+      display: none;
+      margin-top: 20px;
+      padding: 20px;
+      background: #fff;
+      border-radius: 12px;
+      box-shadow: 0 2px 6px rgba(0,0,0,0.1);
+    }
+    input, textarea {
+      width: 100%;
+      margin: 8px 0;
+      padding: 10px;
+      border-radius: 8px;
+      border: 1px solid #ccc;
+    }
+    .submit-btn {
+      background: #2196F3;
+      color: white;
+      border: none;
+      padding: 10px 20px;
+      border-radius: 8px;
+      cursor: pointer;
+      font-weight: bold;
+    }
+    .submit-btn:hover {
+      background: #1976D2;
+    }
+  </style>
+</head>
+<body>
+  <h1>בחר חבילת פרסום</h1>
+  <div class="packages" id="packages"></div>
+
+  <div class="form-container" id="formContainer">
+    <h2>פרטי הפרסום</h2>
+    <form id="adForm">
+      <input type="text" id="title" placeholder="כותרת המודעה" required>
+      <textarea id="description" placeholder="תיאור המודעה" required></textarea>
+      <input type="text" id="contact" placeholder="פרטי יצירת קשר" required>
+      <input type="file" id="image" accept="image/*">
+      <input type="hidden" id="selectedPackageId">
+      <button type="submit" class="submit-btn">שלח פרסום</button>
+    </form>
+  </div>
+
+  <script>
+    // טעינת חבילות מהשרת
+    fetch('http://localhost:8080/api/packages')
+      .then(res => res.json())
+      .then(packages => {
+        const container = document.getElementById('packages');
+        packages.forEach(pkg => {
+          const div = document.createElement('div');
+          div.className = 'package';
+          div.innerHTML = `
+            <h3>${pkg.name}</h3>
+            <p>${pkg.description}</p>
+            <p><strong>${pkg.price} ₪</strong></p>
+            <button onclick="selectPackage(${pkg.id}, '${pkg.name}')">בחר</button>
+          `;
+          container.appendChild(div);
+        });
+      });
+
+    function selectPackage(id, name) {
+      document.getElementById('formContainer').style.display = 'block';
+      document.getElementById('selectedPackageId').value = id;
+      window.scrollTo({ top: document.body.scrollHeight, behavior: 'smooth' });
+    }
+
+    // שליחת הטופס
+    document.getElementById('adForm').addEventListener('submit', function(e) {
+      e.preventDefault();
+
+      const formData = new FormData();
+      formData.append('title', document.getElementById('title').value);
+      formData.append('description', document.getElementById('description').value);
+      formData.append('contact', document.getElementById('contact').value);
+      formData.append('packageId', document.getElementById('selectedPackageId').value);
+      const imageFile = document.getElementById('image').files[0];
+      if (imageFile) {
+        formData.append('image', imageFile);
+      }
+
+      fetch('http://localhost:8080/api/ads', {
+        method: 'POST',
+        body: formData
+      })
+      .then(res => {
+        if (res.ok) {
+          alert('הפרסום נשלח בהצלחה!');
+          window.location.href = '/'; // חזרה ללוח המודעות
+        } else {
+          alert('שגיאה בשליחה');
+        }
+      });
+    });
+  </script>
+</body>
+</html>

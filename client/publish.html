@@ -1,0 +1,108 @@
+<!DOCTYPE html>
+<html lang="he">
+<head>
+  <meta charset="UTF-8">
+  <title>התחברות</title>
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      direction: rtl;
+      padding: 40px;
+    }
+    .container {
+      max-width: 400px;
+      margin: auto;
+      padding: 20px;
+      background-color: #f4f4f4;
+      border-radius: 10px;
+      box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+    }
+    input[type="email"], input[type="password"] {
+      width: 100%;
+      padding: 10px;
+      margin: 10px 0;
+      border-radius: 5px;
+      border: 1px solid #ccc;
+    }
+    button {
+      width: 100%;
+      padding: 10px;
+      background-color: #2196F3;
+      color: white;
+      border: none;
+      border-radius: 5px;
+      cursor: pointer;
+    }
+    button:hover {
+      background-color: #1976D2;
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <h2>התחברות</h2>
+    <input type="email" id="email" placeholder="הכנס מייל">
+    <button onclick="checkEmail()">התחבר</button>
+
+    <div id="registration-form" style="display: none;">
+      <h2>הרשמה</h2>
+      <input type="email" id="reg-email" placeholder="הכנס מייל">
+      <input type="password" id="reg-password" placeholder="הכנס סיסמה">
+      <button onclick="register()">הירשם</button>
+    </div>
+  </div>
+
+  <script>
+    function checkEmail() {
+      const email = document.getElementById('email').value;
+      const urlParams = new URLSearchParams(window.location.search);
+      // שלח בקשה לשרת כדי לבדוק אם המייל קיים
+      fetch(`http://localhost:8080/api/board/client/${email}`)
+        .then(response => {
+          if (response.status === 200) {
+            console.log("הגעתי"+urlParams.get("slotId"));
+            
+            // המייל קיים, נעבור לדף הבחירה
+            const location=urlParams.get("slotId")
+            console.log(location);
+            window.location.href = `choose-package.html?email=${email}&location=${location}`;
+          } else if (response.status === 204) {
+            // המייל לא קיים, מציג את טופס ההרשמה
+            document.getElementById('registration-form').style.display = 'block';
+          } else {
+            alert('שגיאה בטעינת המייל');
+          }
+        })
+        .catch(error => {
+          console.error('שגיאה בשרת:', error);
+        });
+    }
+
+    function register() {
+      const email = document.getElementById('reg-email').value;
+      const password = document.getElementById('reg-password').value;
+
+      // שלח בקשה לשרת להרשמה
+      fetch('http://localhost:8080/api/board/client/', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json'
+        },
+        body: JSON.stringify({ email, password })
+      })
+        .then(response => {
+          if (response.ok) {
+            // הרשמה הצליחה, חזור לדף ההתחברות
+            alert('הרשמה הצליחה!');
+            window.location.href = 'publish.html';
+          } else {
+            alert('הייתה שגיאה בהרשמה');
+          }
+        })
+        .catch(error => {
+          console.error('שגיאה בשרת:', error);
+        });
+    }
+  </script>
+</body>
+</html>
