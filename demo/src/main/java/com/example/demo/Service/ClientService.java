@@ -6,7 +6,6 @@ import com.example.demo.Entity.Package1;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
-
 import java.util.ArrayList;
 import java.util.List;
 
@@ -39,8 +38,6 @@ public class ClientService implements IClientServic{
         Client client = _jpa.findById(email).orElse(null);
         if (client != null) {
             System.out.println("Updating client: " + email + " with ad id: " + adId);
-            // כאן תעשה את הלוגיקה שאתה רוצה, לדוגמה:
-            // להוסיף את קוד הפרסומת לרשימה, או סתם להדפיס
         }
     }
     @Override
@@ -50,10 +47,10 @@ public class ClientService implements IClientServic{
             List<Package1> packages = new ArrayList<>();
             packageRepository.findAllById(packageIds).forEach(packages::add);
             client.setPacekages(packages);
-            _jpa.save(client);  // שמירה מחדש של הלקוח
-            return ResponseEntity.ok("client");  // החזרת הלקוח המעודכן
+            _jpa.save(client);
+            return ResponseEntity.ok("client");
         }
-        return ResponseEntity.notFound().build();  // אם הלקוח לא נמצא, החזרת סטטוס 404
+        return ResponseEntity.notFound().build();
     }
 
 }

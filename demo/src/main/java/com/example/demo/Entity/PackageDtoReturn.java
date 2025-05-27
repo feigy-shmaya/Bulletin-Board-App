@@ -5,14 +5,13 @@ public class PackageDtoReturn {
     private int entrances;
     private int days;
     private int id;
-    // Constructor
+
     public PackageDtoReturn(int entrances, int days,int id) {
         this.entrances = entrances;
         this.days = days;
         this.id=id;
     }
 
-    // Getters and Setters
     public int getEntrances() {
         return entrances;
     }

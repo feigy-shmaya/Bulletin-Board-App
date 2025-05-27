@@ -1,10 +1,8 @@
 package com.example.demo.Service;
-
 import com.example.demo.Dao.jpaPackage1;
 import com.example.demo.Entity.Package1;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
-
 import java.util.ArrayList;
 
 @Service
@@ -25,8 +23,4 @@ public class PackegeService implements IPackegeService{
     public Package1 getById(int id){
         return _jpa.findById(id).orElse(null);
     }
-//    public ArrayList<Package1> delete() {
-//
-//        return (ArrayList<Package1>)_jpa.delete();
-//    }
 }
